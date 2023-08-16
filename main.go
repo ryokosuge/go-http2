@@ -8,6 +8,9 @@ import (
 	"os/signal"
 	"syscall"
 	"time"
+
+	"golang.org/x/net/http2"
+	"golang.org/x/net/http2/h2c"
 )
 
 func main() {
@@ -22,11 +25,13 @@ func main() {
 	defer stop()
 
 	http.Handle("/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, "This request is served over %s protocol.", r.Proto)
+		fmt.Fprintf(w, "This request is served over %s protocol!", r.Proto)
 	}))
 
+	h2srv := &http2.Server{}
 	srv := &http.Server{
-		Addr: fmt.Sprintf(":%s", port),
+		Addr:    fmt.Sprintf(":%s", port),
+		Handler: h2c.NewHandler(http.DefaultServeMux, h2srv),
 	}
 
 	go func() {
