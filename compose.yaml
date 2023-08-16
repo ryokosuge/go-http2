@@ -8,13 +8,23 @@
 # database or a cache. For examples, see the Awesome Compose repository:
 # https://github.com/docker/awesome-compose
 services:
+  proxy:
+    image: nginx:latest
+    ports:
+      - 8888:443
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - ./nginx/certs/server.crt:/etc/nginx/certs/server.crt
+      - ./nginx/certs/server.csr:/etc/nginx/certs/server.csr
+      - ./nginx/certs/server.key:/etc/nginx/certs/server.key
   server:
     build:
       context: .
       target: final
     ports:
       - 8080:8080
-
+    depends_on:
+      - proxy
 # The commented out section below is an example of how to define a PostgreSQL
 # database that your application can use. `depends_on` tells Docker Compose to
 # start the database before your application. The `db-data` volume persists the
